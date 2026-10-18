@@ -1,0 +1,41 @@
+{
+  "name": "wslgate",
+  "version": "0.1.0",
+  "description": "MCP server + CLI that lets AI agents run commands, read/write files, list dirs and translate paths between Windows and WSL (multi-distro)",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "wslgate": "dist/cli.js",
+    "wslgate-mcp": "dist/mcp.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "mcp",
+    "wsl",
+    "windows",
+    "ai-agents",
+    "claude",
+    "cli"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}
