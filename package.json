@@ -19,7 +19,7 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
-    "prepare": "npm run build",
+    "prepare": "npm run build || echo \"wslgate: tsc unavailable (git install), using committed dist\"",
     "prepublishOnly": "npm run build && npm test"
   },
   "keywords": [

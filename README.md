@@ -26,7 +26,7 @@ default distro when omitted. Start with `--read-only` to disable `wsl_exec`/`wsl
 ## Install / run
 
 > **Status:** the npm package is not published yet. Until it is, install straight
-> from GitHub — npm builds it on install (`prepare` → `tsc`):
+> from GitHub — the build output in `dist/` is committed, so no compiler is needed:
 >
 > ```
 > npm install -g github:technothatch/wslgate
