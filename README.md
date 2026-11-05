@@ -25,6 +25,16 @@ default distro when omitted. Start with `--read-only` to disable `wsl_exec`/`wsl
 
 ## Install / run
 
+> **Status:** the npm package is not published yet. Until it is, install straight
+> from GitHub — npm builds it on install (`prepare` → `tsc`):
+>
+> ```
+> npm install -g github:technothatch/wslgate
+> ```
+>
+> The `npx wslgate-mcp` / `npm install -g wslgate` forms below will work as soon
+> as the package is on npm.
+
 ```
 npx wslgate-mcp                 # MCP stdio server
 npx wslgate-mcp --read-only     # read-only mode
