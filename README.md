@@ -2,11 +2,12 @@
 
 **The bridge AI agents on Windows need to reach WSL — MCP server + CLI in one package.**
 
-Agents like Claude Code run on Windows, but the code lives in WSL. The maintainers know it:
-[anthropics/claude-code#3396](https://github.com/anthropics/claude-code/issues/3396)
-("execute commands in WSL instead of Windows") has been one of the most-upvoted feature requests
-on that repo. Until every agent ships native WSL support, `wslgate` gives any MCP-compatible
-client the same capability — and gives you a CLI for the same operations by hand.
+Agents like Claude Code run on Windows, but the code lives in WSL. The demand is documented:
+[anthropics/claude-code#12506](https://github.com/anthropics/claude-code/issues/12506)
+("Option to execute commands in WSL instead of Windows") gathered **147 reactions** before it was
+closed, and [microsoft/vscode#289657](https://github.com/microsoft/vscode/issues/289657) is open for
+the same problem in Copilot Agent. Until every agent ships native WSL support, `wslgate` gives any
+MCP-compatible client the same capability — and gives you a CLI for the same operations by hand.
 
 ## Tools (MCP)
 
