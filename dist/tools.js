@@ -31,7 +31,8 @@ export function createServer(opts = {}) {
         if (readOnly)
             return { ...text(READ_ONLY_MSG), isError: true };
         try {
-            return text(await ops.exec(command, distro, timeout_ms ?? 60_000));
+            const result = await ops.exec(command, distro, timeout_ms ?? 60_000);
+            return text(result.text);
         }
         catch (e) {
             return { ...text(String(e)), isError: true };

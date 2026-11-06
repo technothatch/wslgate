@@ -11,9 +11,16 @@ export function defaultOps(spawnFn?: SpawnFn): WslOps {
   };
 }
 
+export interface ExecResult {
+  /** Human-readable stdout + stderr + `[exit N]` summary. */
+  text: string;
+  /** Exit code of the remote command. */
+  code: number;
+}
+
 export interface Ops {
   listDistros(): Promise<string[]>;
-  exec(command: string, distro: string | undefined, timeoutMs: number): Promise<string>;
+  exec(command: string, distro: string | undefined, timeoutMs: number): Promise<ExecResult>;
   readFile(path: string, distro: string | undefined): Promise<string>;
   writeFile(path: string, content: string, distro: string | undefined): Promise<string>;
   listDir(path: string, distro: string | undefined): Promise<string>;
@@ -47,7 +54,7 @@ export function createOps(wsl: WslOps, translate: (p: string) => string): Ops {
       let text = out;
       if (err) text += (text ? "\n" : "") + `[stderr] ${err}`;
       text += (text ? "\n" : "") + `[exit ${res.code}]`;
-      return text;
+      return { text, code: res.code };
     },
     async readFile(path, distro) {
       const res = await wsl.run(

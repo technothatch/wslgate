@@ -27,7 +27,7 @@ export function createOps(wsl, translate) {
             if (err)
                 text += (text ? "\n" : "") + `[stderr] ${err}`;
             text += (text ? "\n" : "") + `[exit ${res.code}]`;
-            return text;
+            return { text, code: res.code };
         },
         async readFile(path, distro) {
             const res = await wsl.run([...distroArgs(distro), "--exec", "bash", "-lc", `cat -- ${shellQuote(path)}`]);

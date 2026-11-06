@@ -20,10 +20,11 @@ describe("createOps", () => {
   it("builds exec command with distro and bash -lc", async () => {
     const { wsl, calls } = fakeWsl({ stdout: "hi\n" });
     const ops = createOps(wsl, translatePath);
-    const out = await ops.exec("ls -la /tmp", "Ubuntu", 5000);
+    const res = await ops.exec("ls -la /tmp", "Ubuntu", 5000);
     expect(calls[0]).toEqual(["-d", "Ubuntu", "--exec", "bash", "-lc", "ls -la /tmp"]);
-    expect(out).toContain("hi");
-    expect(out).toContain("[exit 0]");
+    expect(res.text).toContain("hi");
+    expect(res.text).toContain("[exit 0]");
+    expect(res.code).toBe(0);
   });
   it("omits -d for default distro", async () => {
     const { wsl, calls } = fakeWsl();
@@ -31,12 +32,13 @@ describe("createOps", () => {
     await ops.exec("true", undefined, 1000);
     expect(calls[0][0]).toBe("--exec");
   });
-  it("reports stderr and non-zero exit", async () => {
+  it("reports stderr, non-zero exit, and exposes the code", async () => {
     const wslOps = { run: async () => ({ stdout: "partial", stderr: "boom", code: 1 }) };
     const ops = createOps(wslOps, translatePath);
-    const out = await ops.exec("false", undefined, 1000);
-    expect(out).toContain("[stderr] boom");
-    expect(out).toContain("[exit 1]");
+    const res = await ops.exec("false", undefined, 1000);
+    expect(res.text).toContain("[stderr] boom");
+    expect(res.text).toContain("[exit 1]");
+    expect(res.code).toBe(1);
   });
   it("writeFile uses base64 pipeline", async () => {
     const { wsl, calls } = fakeWsl();

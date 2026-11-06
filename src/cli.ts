@@ -62,7 +62,10 @@ async function main() {
     const sep = argv.indexOf("--");
     const command = (sep === -1 ? argv : argv.slice(sep + 1)).join(" ");
     if (!command) throw new Error("usage: wslgate exec [--distro d] -- <command...>");
-    process.stdout.write(await ops.exec(command, distro, timeoutMs) + "\n");
+    const result = await ops.exec(command, distro, timeoutMs);
+    process.stdout.write(result.text + "\n");
+    // Propagate the remote exit code so shell scripts and CI can branch on it.
+    if (result.code !== 0) process.exitCode = result.code;
     return;
   }
   if (cmd === "read") {
