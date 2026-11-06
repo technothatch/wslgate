@@ -26,12 +26,14 @@ default distro when omitted. Start with `--read-only` to disable `wsl_exec`/`wsl
 ## Install / run
 
 > **Status:** the npm package is not published yet. Until it is, install straight
-> from GitHub — the build output in `dist/` is committed, so no compiler is needed:
+> from GitHub. `--install-links` is required: without it npm 10/11 links the
+> global install to a temporary clone and then deletes it.
 >
 > ```
-> npm install -g github:technothatch/wslgate
+> npm install -g --install-links github:technothatch/wslgate
 > ```
 >
+> The build output in `dist/` is committed, so no TypeScript compiler is needed.
 > The `npx wslgate-mcp` / `npm install -g wslgate` forms below will work as soon
 > as the package is on npm.
 
@@ -65,7 +67,8 @@ wslgate mcp --read-only
 ## Honest technical notes
 
 - Every operation is a `wsl.exe --exec bash -lc ...` invocation — one process, real exit codes,
-  no `\\wsl$` UNC tricks.
+  no `\\wsl$` UNC tricks. `wslgate exec` exits with the remote command's exit code, so it works in
+  scripts and CI (`wslgate exec --distro Ubuntu -- "make test" || exit 1`).
 - `wsl --list` output is UTF-16LE on Windows; `wslgate` detects and decodes it (BOM or heuristic).
 - Files are written via `base64 -d` so content with quotes, `$` or newlines survives the trip.
 - Paths are validated/quoted with strict single-quote shell escaping before hitting bash.
