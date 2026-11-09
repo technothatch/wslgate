@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { defaultOps, createOps } from "./ops.js";
 import { translatePath } from "./tools.js";
+import { buildProxyArgs, runProxy } from "./proxy.js";
 const USAGE = `wslgate - Windows <-> WSL bridge for humans and AI agents
 
 Usage:
@@ -11,6 +12,8 @@ Usage:
   wslgate write [--distro d] <path>     write stdin to a file
   wslgate ls [--distro d] <path>        list a directory
   wslgate mcp [--read-only]             run the MCP stdio server (same as wslgate-mcp)
+  wslgate mcp-proxy [--distro d] [--cwd path] -- <command...>
+                                         run an MCP server inside WSL, relaying stdio
 `;
 function takeFlag(args, name) {
     const i = args.indexOf(name);
@@ -51,6 +54,20 @@ async function main() {
         if (!p)
             throw new Error("usage: wslgate translate <path>");
         process.stdout.write(translatePath(p) + "\n");
+        return;
+    }
+    if (cmd === "mcp-proxy") {
+        const sep = argv.indexOf("--");
+        const inner = sep === -1 ? [] : argv.slice(sep + 1);
+        if (inner.length === 0) {
+            throw new Error("usage: wslgate mcp-proxy [--distro d] [--cwd path] -- <command...>");
+        }
+        // --cwd must be pulled off before the `--` separator handling above
+        // would treat it as part of the command; recompute from a fresh copy.
+        const cwd = takeFlag(argv.slice(0, sep === -1 ? argv.length : sep), "--cwd");
+        const code = await runProxy(buildProxyArgs(inner, { distro, cwd }));
+        if (code !== 0)
+            process.exitCode = code;
         return;
     }
     if (cmd === "exec") {

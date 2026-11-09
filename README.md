@@ -23,6 +23,34 @@ MCP-compatible client the same capability — and gives you a CLI for the same o
 All file/exec tools take an optional `distro` (`Ubuntu`, `Debian`, …) — **multi-distro**,
 default distro when omitted. Start with `--read-only` to disable `wsl_exec`/`wsl_write_file`.
 
+## Run your MCP servers *inside* WSL
+
+Some clients spawn a project's `.mcp.json` on the Windows host even when the project lives in
+WSL, so every server fails because `bash`, `node` and `python3` resolve to Windows binaries
+([claude-code#102712](https://github.com/anthropics/claude-code/issues/102712) is a detailed
+write-up of that). The workaround people hand-roll is a `wsl.exe` dispatcher per entry —
+`wslgate mcp-proxy` is that dispatcher, packaged:
+
+```json
+{
+  "mcpServers": {
+    "fs": {
+      "command": "wslgate",
+      "args": [
+        "mcp-proxy", "--distro", "Ubuntu", "--cwd", "C:\\proj", "--",
+        "npx", "-y", "@modelcontextprotocol/server-filesystem", "/home/me/proj"
+      ]
+    }
+  }
+}
+```
+
+`mcp-proxy` spawns `wsl.exe --exec bash -lc …` and relays stdin/stdout/stderr byte for byte
+(no buffering or re-encoding), then exits with the server's exit code. `--cwd` accepts a
+Windows path and is translated to `/mnt/...` for you. It is a CLI subcommand, so `--read-only`
+(which gates the MCP server's own tools) does not apply to it — treat it as arbitrary command
+execution.
+
 ## Install / run
 
 > **Status:** the npm package is not published yet. Until it is, install straight
@@ -61,6 +89,7 @@ wslgate read C:\Users\me\.bashrc
 wslgate translate C:\Projects\app
 wslgate ls /mnt/c/Windows
 echo "hi" | wslgate write /tmp/hello.txt
+wslgate mcp-proxy --distro Ubuntu -- npx -y @modelcontextprotocol/server-filesystem /home/me
 wslgate mcp --read-only
 ```
 
