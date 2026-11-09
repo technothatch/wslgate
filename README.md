@@ -51,6 +51,9 @@ Windows path and is translated to `/mnt/...` for you. It is a CLI subcommand, so
 (which gates the MCP server's own tools) does not apply to it — treat it as arbitrary command
 execution.
 
+> **The story behind it:** [Cross the Windows–WSL boundary with less friction](https://technothatch.iyre.com/blog/wslgate-inside-the-project/)
+> — the TechnoThatch journal piece on why every operation is a single `wsl.exe` process.
+
 ## Install / run
 
 > **Status:** the npm package is not published yet. Until it is, install straight
