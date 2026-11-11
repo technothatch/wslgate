@@ -47,9 +47,10 @@ write-up of that). The workaround people hand-roll is a `wsl.exe` dispatcher per
 
 `mcp-proxy` spawns `wsl.exe --exec bash -lc …` and relays stdin/stdout/stderr byte for byte
 (no buffering or re-encoding), then exits with the server's exit code. `--cwd` accepts a
-Windows path and is translated to `/mnt/...` for you. It is a CLI subcommand, so `--read-only`
-(which gates the MCP server's own tools) does not apply to it — treat it as arbitrary command
-execution.
+Windows path and is translated to `/mnt/...` for you; a relative path is resolved against
+the current directory first, because `wsl.exe --cd .` fails with `Wsl/E_INVALIDARG`.
+It is a CLI subcommand, so `--read-only` (which gates the MCP server's own tools) does not
+apply to it — treat it as arbitrary command execution.
 
 > **The story behind it:** [Cross the Windows–WSL boundary with less friction](https://technothatch.iyre.com/blog/wslgate-inside-the-project/)
 > — the TechnoThatch journal piece on why every operation is a single `wsl.exe` process.

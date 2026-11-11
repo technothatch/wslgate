@@ -2,17 +2,34 @@ import { spawn } from "node:child_process";
 import { shellQuote, toWslPath } from "./paths.js";
 /**
  * Translate a `--cwd` value for `wsl.exe --cd`.
- * `C:\proj` becomes `/mnt/c/proj`; WSL and relative paths pass through.
+ * `C:\proj` becomes `/mnt/c/proj`; WSL paths pass through.
+ *
+ * Relative paths are resolved against the current working directory first.
+ * `wsl.exe --cd .` fails with `Wsl/E_INVALIDARG` ("The parameter is
+ * incorrect"), so a relative path must never reach `--cd`.
  */
-export function proxyCwd(cwd) {
-    return toWslPath(cwd);
+export function proxyCwd(cwd, baseDir = process.cwd()) {
+    const translated = toWslPath(cwd);
+    if (!isAbsoluteWslPath(translated)) {
+        const base = toWslPath(baseDir).replace(/\/+$/, "");
+        const rel = translated
+            .split("/")
+            .filter((part) => part !== "" && part !== ".")
+            .join("/");
+        return rel ? `${base}/${rel}` : base;
+    }
+    return translated;
 }
-export function buildProxyArgs(command, spec = {}) {
+/** True for an absolute POSIX path (`/...`) or a Windows drive/UNC path. */
+function isAbsoluteWslPath(p) {
+    return p.startsWith("/") || /^[A-Za-z]:[\\/]/.test(p) || p.startsWith("\\\\");
+}
+export function buildProxyArgs(command, spec = {}, baseDir = process.cwd()) {
     const args = [];
     if (spec.distro)
         args.push("-d", spec.distro);
     if (spec.cwd)
-        args.push("--cd", proxyCwd(spec.cwd));
+        args.push("--cd", proxyCwd(spec.cwd, baseDir));
     args.push("--exec", "bash", "-lc", command.map(shellQuote).join(" "));
     return args;
 }

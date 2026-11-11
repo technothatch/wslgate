@@ -20,12 +20,27 @@ describe("mcp-proxy", () => {
     ]);
   });
 
-  it("passes WSL and relative cwds through untouched", () => {
+  it("passes absolute WSL cwds through untouched", () => {
     expect(proxyCwd("/home/me/src")).toBe("/home/me/src");
-    expect(proxyCwd(".")).toBe(".");
-    expect(buildProxyArgs(["true"], { cwd: "." })).toContain("--cd");
     expect(buildProxyArgs(["true"], {})).not.toContain("--cd");
     expect(buildProxyArgs(["true"], {})).not.toContain("-d");
+  });
+
+  it("resolves a relative cwd to an absolute path", () => {
+    // `wsl.exe --cd .` fails with Wsl/E_INVALIDARG, so a relative path must
+    // never reach --cd.
+    expect(proxyCwd(".", "C:\\Users\\me\\proj")).toBe("/mnt/c/Users/me/proj");
+    expect(proxyCwd("sub", "C:\\Users\\me\\proj")).toBe("/mnt/c/Users/me/proj/sub");
+    expect(proxyCwd("./sub", "C:\\Users\\me\\proj")).toBe("/mnt/c/Users/me/proj/sub");
+
+    const args = buildProxyArgs(["true"], { cwd: "." }, "C:\\Users\\me\\proj");
+    expect(args[args.indexOf("--cd") + 1]).toBe("/mnt/c/Users/me/proj");
+    expect(args[args.indexOf("--cd") + 1]).not.toBe(".");
+  });
+
+  it("resolves a relative cwd against a WSL base directory", () => {
+    expect(proxyCwd(".", "/home/me/proj")).toBe("/home/me/proj");
+    expect(proxyCwd("src", "/home/me/proj")).toBe("/home/me/proj/src");
   });
 
   it("quotes arguments so paths with spaces survive bash -lc", () => {
