@@ -93,9 +93,40 @@ wslgate read C:\Users\me\.bashrc
 wslgate translate C:\Projects\app
 wslgate ls /mnt/c/Windows
 echo "hi" | wslgate write /tmp/hello.txt
+wslgate doctor --distro Ubuntu
 wslgate mcp-proxy --distro Ubuntu -- npx -y @modelcontextprotocol/server-filesystem /home/me
 wslgate mcp --read-only
 ```
+
+## Diagnose a mixed Windows/WSL toolchain
+
+Inside WSL, `node` can be the Linux one while `npm` is the Windows one — so a
+tool that shells out to npm fails with a UNC path it cannot open.
+
+`wslgate doctor` shows which programs are actually resolved, and marks the
+ones that come from Windows:
+
+```
+$ wslgate doctor --distro Ubuntu
+distribution: Ubuntu 24.04
+windows interop on PATH: 32 entries (first at position 3)
+
+resolved in a non-interactive shell (what an MCP client gets):
+  npm      /mnt/c/Users/me/AppData/Roaming/npm/npm  <-- windows program
+  node     /usr/local/bin/node
+
+resolved differently in an interactive shell (what your terminal gets):
+  npm      /home/me/.local/share/fnm/aliases/default/bin/npm
+```
+
+The difference is the diagnosis. A toolchain set up in `~/.bashrc` (fnm, nvm,
+asdf …) is not applied in a non-interactive shell, because Ubuntu's default
+`~/.bashrc` returns early for them — and a **login** shell does not help
+either, since `bash -lc` is still non-interactive. Only an interactive shell
+(`bash -ic`) picks it up. That is why the usual advice to "use a login shell"
+leaves the problem exactly where it was.
+
+The same report is available as the `wsl_doctor` MCP tool.
 
 ## Honest technical notes
 

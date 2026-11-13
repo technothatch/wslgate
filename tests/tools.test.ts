@@ -72,7 +72,7 @@ async function connected(readOnly: boolean) {
 }
 
 describe("MCP server", () => {
-  it("registers the six tools", async () => {
+  it("registers the seven tools", async () => {
     const client = await connected(false);
     const { tools } = await client.listTools();
     expect(new Set(tools.map((t) => t.name))).toEqual(
@@ -83,6 +83,7 @@ describe("MCP server", () => {
         "wsl_write_file",
         "wsl_list_dir",
         "wsl_path_translate",
+        "wsl_doctor",
       ]),
     );
     await client.close();

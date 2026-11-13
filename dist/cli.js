@@ -2,6 +2,7 @@
 import { defaultOps, createOps } from "./ops.js";
 import { translatePath } from "./tools.js";
 import { buildProxyArgs, runProxy } from "./proxy.js";
+import { DOCTOR_SCRIPT } from "./doctor.js";
 const USAGE = `wslgate - Windows <-> WSL bridge for humans and AI agents
 
 Usage:
@@ -11,6 +12,7 @@ Usage:
   wslgate read [--distro d] <path>      read a file (stdout)
   wslgate write [--distro d] <path>     write stdin to a file
   wslgate ls [--distro d] <path>        list a directory
+  wslgate doctor [--distro d]           diagnose the toolchain inside WSL
   wslgate mcp [--read-only]             run the MCP stdio server (same as wslgate-mcp)
   wslgate mcp-proxy [--distro d] [--cwd path] -- <command...>
                                          run an MCP server inside WSL, relaying stdio
@@ -102,6 +104,14 @@ async function main() {
         if (!p)
             throw new Error("usage: wslgate ls <path>");
         process.stdout.write(await ops.listDir(p, distro) + "\n");
+        return;
+    }
+    if (cmd === "doctor") {
+        process.stdout.write((await ops.doctor(distro)) + "\n");
+        return;
+    }
+    if (cmd === "--print-doctor-script") {
+        process.stdout.write(DOCTOR_SCRIPT);
         return;
     }
     process.stderr.write(`unknown command: ${cmd}\n\n` + USAGE);

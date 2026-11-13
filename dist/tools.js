@@ -100,6 +100,21 @@ export function createServer(opts = {}) {
             return text(wsl);
         return text(toWindowsPath(path));
     });
+    server.registerTool("wsl_doctor", {
+        description: "Diagnose the toolchain inside WSL: which node/npm/python/git are resolved, " +
+            "whether a Windows program shadows the distribution's own, and whether the " +
+            "answer differs between a non-interactive and an interactive shell",
+        inputSchema: {
+            distro: z.string().optional().describe("distribution name, e.g. Ubuntu"),
+        },
+    }, async ({ distro }) => {
+        try {
+            return text(await ops.doctor(distro));
+        }
+        catch (e) {
+            return { ...text(String(e)), isError: true };
+        }
+    });
     return { server, ops };
 }
 export function translatePath(p) {

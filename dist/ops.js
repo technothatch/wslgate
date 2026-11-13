@@ -1,4 +1,5 @@
 import { shellQuote } from "./paths.js";
+import { DOCTOR_SCRIPT, formatDoctor, parseDoctorOutput } from "./doctor.js";
 import { parseDistros, runWsl } from "./wsl.js";
 export function defaultOps(spawnFn) {
     return {
@@ -46,6 +47,10 @@ export function createOps(wsl, translate) {
         },
         translate(path) {
             return translate(path);
+        },
+        async doctor(distro) {
+            const res = await wsl.run([...distroArgs(distro), "--exec", "bash", "-lc", DOCTOR_SCRIPT], 60_000);
+            return formatDoctor(parseDoctorOutput(res.stdout));
         },
     };
 }

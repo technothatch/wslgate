@@ -1,4 +1,5 @@
 import { shellQuote } from "./paths.js";
+import { DOCTOR_SCRIPT, formatDoctor, parseDoctorOutput } from "./doctor.js";
 import { parseDistros, runWsl, type SpawnFn } from "./wsl.js";
 
 export interface WslOps {
@@ -25,6 +26,7 @@ export interface Ops {
   writeFile(path: string, content: string, distro: string | undefined): Promise<string>;
   listDir(path: string, distro: string | undefined): Promise<string>;
   translate(path: string): string;
+  doctor(distro: string | undefined): Promise<string>;
 }
 
 export function createOps(wsl: WslOps, translate: (p: string) => string): Ops {
@@ -77,6 +79,13 @@ export function createOps(wsl: WslOps, translate: (p: string) => string): Ops {
     },
     translate(path) {
       return translate(path);
+    },
+    async doctor(distro) {
+      const res = await wsl.run(
+        [...distroArgs(distro), "--exec", "bash", "-lc", DOCTOR_SCRIPT],
+        60_000,
+      );
+      return formatDoctor(parseDoctorOutput(res.stdout));
     },
   };
 }
